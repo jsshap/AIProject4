@@ -148,17 +148,48 @@ class ExactInference(InferenceModule):
         emissionModel = busters.getObservationDistribution(noisyDistance)
         pacmanPosition = gameState.getPacmanPosition()
 
+
+        #emissionModel[x] is the probability of getting the noisyDistance we have given x is the true distance
+
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
         # Replace this code with a correct observation update
         # Be sure to handle the "jail" edge case where the ghost is eaten
         # and noisyDistance is None
         allPossible = util.Counter()
-        for p in self.legalPositions:
+
+
+
+          
+        #for p in self.legalPositions:
+        '''
             trueDistance = util.manhattanDistance(p, pacmanPosition)
             if emissionModel[trueDistance] > 0:
                 allPossible[p] = 1.0
+        '''
+
+        '''
+        we're solcing for p(pos | noisy)
+        Bays says p (pos | noisy) = p(pos)*p(noisy|pos)/p(noisy)
+        
+        first, we believe we are in pos at self.beliefs[pos]
+        p (noisy|pos) is emission model
+
+        / by p(noisy) is done by the counter before returning
+        
+        
+        '''
+
+        #self.initializeUniformly(gameState)
+        for p in self.legalPositions:
+            true = util.manhattanDistance(p, pacmanPosition)
+            #print self.beliefs[p], emissionModel[true]
+            allPossible[p] = self.beliefs[p] * emissionModel[true]
+        if observation == None:
+            jail = self.getJailPosition()
+            for p in self.legalPositions:
+                allPossible[p] = 0
+            allPossible[jail] = 1.0
 
         "*** END YOUR CODE HERE ***"
 
