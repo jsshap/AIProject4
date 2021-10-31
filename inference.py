@@ -209,7 +209,7 @@ class ExactInference(InferenceModule):
         given its previous position (oldPos) as well as Pacman's current
         position, use this line of code:
 
-          newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos))
+          newPosDistribution = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos))
 
         Note that you may need to replace "oldPos" with the correct name of the
         variable that you have used to refer to the previous ghost position for
@@ -250,7 +250,51 @@ class ExactInference(InferenceModule):
         positions after a time update from a particular position.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        #grab the old beliefs
+        #for each old belief, for each successor of that belief, set the prob of being in the successor equal to what we calulate
+
+        '''
+        allPossible = self.beliefs.copy()
+        for location, prob in allPossible.items():
+            newPosDistribution = self.getPositionDistribution(self.setGhostPosition(gameState, location))
+            for newPos, likelihood in newPosDistribution.items():
+                #print newPos
+                allPossible[newPos] += self.beliefs[newPos] * likelihood
+            
+        allPossible.normalize()
+        self.beliefs = allPossible
+        '''
+        '''
+        
+        allPossible = self.beliefs.copy()
+        for p in self.legalPositions:
+            newPosDistribution = self.getPositionDistribution(self.setGhostPosition(gameState, p))
+            for newPos, likelihood in newPosDistribution.items():
+                allPossible[newPos] += self.beliefs[p] * likelihood
+
+        allPossible.normalize()
+        self.beliefs = allPossible
+        '''
+        new = self.beliefs.copy()
+        for p in self.legalPositions:
+            newPosDistro = self.getPositionDistribution(self.setGhostPosition(gameState, p))
+            for newPos, likelihood in newPosDistro.items():
+                new[newPos] += likelihood * new[newPos]
+
+        new.normalize()
+        self.beliefs = new
+
+
+
+        
+
+        #ghosts = gameState.getGhostPosition()
+
+    
+
+        
+        
 
     def getBeliefDistribution(self):
         return self.beliefs
