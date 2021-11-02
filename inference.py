@@ -253,7 +253,7 @@ class ExactInference(InferenceModule):
 
 
         
-        newList = self.beliefs.copy()
+        newList = util.Counter()
         for p in self.legalPositions:
             newPosDistro = self.getPositionDistribution(self.setGhostPosition(gameState, p))
             for newPos, prob in newPosDistro.items():#[::-1]:
