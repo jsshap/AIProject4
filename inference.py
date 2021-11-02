@@ -248,54 +248,30 @@ class ExactInference(InferenceModule):
         #grab the old beliefs
         #for each old belief, for each successor of that belief, set the prob of being in the successor equal to what we calulate
 
-        '''
-        allPossible = self.beliefs.copy()
-        for location, prob in allPossible.items():
-            newPosDistribution = self.getPositionDistribution(self.setGhostPosition(gameState, location))
-            for newPos, likelihood in newPosDistribution.items():
-                #print newPos
-                allPossible[newPos] += self.beliefs[newPos] * likelihood
-            
-        allPossible.normalize()
-        self.beliefs = allPossible
-        '''
-        '''
-        
-        allPossible = self.beliefs.copy()
-        for p in self.legalPositions:
-            newPosDistribution = self.getPositionDistribution(self.setGhostPosition(gameState, p))
-            for newPos, likelihood in newPosDistribution.items():
-                allPossible[newPos] += self.beliefs[p] * likelihood
 
-        allPossible.normalize()
-        self.beliefs = allPossible
-        '''
+
+
+
         
+        newList = self.beliefs.copy()
+        for p in self.legalPositions:
+            newPosDistro = self.getPositionDistribution(self.setGhostPosition(gameState, p))
+            for newPos, prob in newPosDistro.items():#[::-1]:
+                #print likelihood, newPos, likelihood * self.beliefs[p]
+                newList[newPos] += prob * self.beliefs[p]#*self.beliefs[p]
+
+        newList.normalize()
+        self.beliefs = newList
+        '''
+
         new = self.beliefs.copy()
         for p in self.legalPositions:
-            newPosDistro = self.getPositionDistribution(self.setGhostPosition(gameState, p))
-            for newPos, likelihood in newPosDistro.items():
-                #print likelihood, newPos, likelihood * self.beliefs[p]
-                new[newPos] += newPosDistro[newPos] * self.beliefs[p]#*self.beliefs[p]
-
+            for p2 in self.legalPositions:
+                stuff = self.getPositionDistribution(self.setGhostPosition(gameState, p2))
+                if p in stuff:
+                    new[p] += self.beliefs[p2]*stuff[p]
         new.normalize()
         self.beliefs = new
-
-        '''
-        positions = {}
-        for p in self.legalPositions:
-            positions[p] = []
-        for p in self.legalPositions:
-            newPosDistro = self.getPositionDistribution(self.setGhostPosition(gameState, p))
-            for newPos, likelihood in newPosDistro.items():
-                positions[newPos].append(likelihood)
-        
-        for t, s in positions.items():
-            amount = sum ([self.beliefs[t] * elem for elem in s])
-            self.beliefs[t] = amount
-        
-        self.beliefs.normalize()
-            
         '''
 
 
