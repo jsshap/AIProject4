@@ -163,7 +163,7 @@ class GreedyBustersAgent(BustersAgent):
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
              if livingGhosts[i+1]]
         "*** YOUR CODE HERE ***"
-        
+        #print "----------------------------------------------------------"
         minDist = None
         closeGhost = None
         clostGhostLoc = None
@@ -172,13 +172,16 @@ class GreedyBustersAgent(BustersAgent):
         likelyLocations = []
         for ghost in livingGhostPositionDistributions:
             mostLikely = None
+            highestProb = None
             #for each ghost, find the location we think it is probably in
             for item in ghost.keys():
-                if mostLikely is None or ghost[item] > mostLikely:
+                if highestProb is None or ghost[item] > highestProb:
                     mostLikely = item
+                    highestProb = ghost[item]
             #add to our list of where we think the ghosts are
             likelyLocations.append(mostLikely)
         
+        #print likelyLocations
         #list of ghost locations and their distances
         closeGhost = [(loc, self.distancer.getDistance(pacmanPosition, loc)) for loc in likelyLocations]
         
@@ -186,19 +189,21 @@ class GreedyBustersAgent(BustersAgent):
 
         #closest is now (loc, distance) of closest ghost
 
-
+        #print closeGhost
         for g in closeGhost:
-            if g[1] is None or g[1] < closest[1]:
-                closest[1] = g[1]
-                closest[0] = g[0]
+            #print closest, " loop"
+            if closest[1] is None or g[1] < closest[1]:
+                closest = (g[0], g[1])
         
         bestScore = None
         bestMove = None
-        for l in legal:
-            dist = self.distancer.getDistance(closest[1], Actions.getSuccessor(pacmanPosition, l))
+        #print closest
+        #print pacmanPosition
+        for action in legal:
+            dist = self.distancer.getDistance(closest[0], Actions.getSuccessor(pacmanPosition, action))
             if bestScore is None or dist < bestScore:
                 bestScore = dist
-                bestMove = l
+                bestMove = action
         
         return bestMove
 
