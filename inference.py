@@ -169,13 +169,7 @@ class ExactInference(InferenceModule):
         '''
 
         '''
-        we're solcing for p(pos | noisy)
-        Bays says p (pos | noisy) = p(pos)*p(noisy|pos)/p(noisy)
-        
-        first, we believe we are in pos at self.beliefs[pos]
-        p (noisy|pos) is emission model
 
-        / by p(noisy) is done by the counter before returning
         
         
         '''
@@ -276,15 +270,33 @@ class ExactInference(InferenceModule):
         allPossible.normalize()
         self.beliefs = allPossible
         '''
+        
         new = self.beliefs.copy()
         for p in self.legalPositions:
             newPosDistro = self.getPositionDistribution(self.setGhostPosition(gameState, p))
             for newPos, likelihood in newPosDistro.items():
-                new[newPos] += likelihood * new[newPos]
+                #print likelihood, newPos, likelihood * self.beliefs[p]
+                new[newPos] += newPosDistro[newPos] * self.beliefs[p]#*self.beliefs[p]
 
         new.normalize()
         self.beliefs = new
 
+        '''
+        positions = {}
+        for p in self.legalPositions:
+            positions[p] = []
+        for p in self.legalPositions:
+            newPosDistro = self.getPositionDistribution(self.setGhostPosition(gameState, p))
+            for newPos, likelihood in newPosDistro.items():
+                positions[newPos].append(likelihood)
+        
+        for t, s in positions.items():
+            amount = sum ([self.beliefs[t] * elem for elem in s])
+            self.beliefs[t] = amount
+        
+        self.beliefs.normalize()
+            
+        '''
 
 
         
