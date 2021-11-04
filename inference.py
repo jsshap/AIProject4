@@ -318,6 +318,14 @@ class ParticleFilter(InferenceModule):
         """
         "*** YOUR CODE HERE ***"
 
+        print self.numParticles
+        self.particles = []
+        numPositions = len(self.legalPositions)
+        particlesPerPosition = self.numParticles/numPositions
+        for pos in self.legalPositions:
+            for i in range(particlesPerPosition):
+                self.particles.append(pos)
+
     def observe(self, observation, gameState):
         """
         Update beliefs based on the given distance observation. Make sure to
