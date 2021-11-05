@@ -373,8 +373,8 @@ class ParticleFilter(InferenceModule):
         #reweight
         jail = self.getJailPosition()
         if noisyDistance == None:
-            for p in self.particles:
-                p = (jail, p[1])
+            for i, p in enumerate(self.particles):
+                self.particles[i] = (jail, p[1])
             return
 
         for i, p in enumerate(self.particles):
@@ -431,12 +431,12 @@ class ParticleFilter(InferenceModule):
         """
         "*** YOUR CODE HERE ***"
         #print "heeree"
-        for p in self.particles:
+        for i, p in enumerate(self.particles):
             oldPos = p[0]
             newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos))
             newPos = util.sample(newPosDist)
             #print oldPos, newPos
-            p = (newPos, p[1])
+            self.particles[i] = (newPos, p[1])
 
     def getBeliefDistribution(self):
         """
