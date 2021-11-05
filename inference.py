@@ -319,13 +319,24 @@ class ParticleFilter(InferenceModule):
         "*** YOUR CODE HERE ***"
 
         #print self.numParticles
-        self.particles = []
-        numPositions = len(self.legalPositions)
-        particlesPerPosition = self.numParticles/numPositions
-        for pos in self.legalPositions:
-            for i in range(particlesPerPosition):
-                self.particles.append((pos, 1))
-                #each particle is a tuple of (position, weight)
+        self.beliefs = util.Counter()
+        if not self.beliefs.items():
+            self.particles = []
+            numPositions = len(self.legalPositions)
+            particlesPerPosition = self.numParticles/numPositions
+            for pos in self.legalPositions:
+                for i in range(particlesPerPosition):
+                    self.particles.append((pos, 1))
+                    #each particle is a tuple of (position, weight)
+        else:
+            #self.beliefs exists
+            self.particles = []
+            for i in range(self.numParticles):
+                sample = ((util.sample(self.beliefs), 1))
+                print sample
+                self.particles.append(sample)
+            
+
 
     def observe(self, observation, gameState):
         """
@@ -354,11 +365,12 @@ class ParticleFilter(InferenceModule):
         You may also want to use util.manhattanDistance to calculate the
         distance between a particle and Pacman's position.
         """
-        update = self.beliefs
         noisyDistance = observation
         emissionModel = busters.getObservationDistribution(noisyDistance)
         pacmanPosition = gameState.getPacmanPosition()
         "*** YOUR CODE HERE ***"
+        update = self.beliefs
+        #reweight
         jail = self.getJailPosition()
         if noisyDistance == None:
             for p in self.particles:
@@ -370,10 +382,30 @@ class ParticleFilter(InferenceModule):
                 allZero = False
                 break
         if allZero:
-            self.initializeUniformly
-         
+            self.initializeUniformly()
+        
+
         for p in self.particles:
             p = (p[0],emissionModel[p[0]]*p[1])
+
+        #resample
+        #make counter with position, weight:
+        toSample = util.Counter()
+        for p in self.particles:
+            if p[0] in toSample:
+                toSample[p[0]] += p[1]
+            else:
+                toSample[p[0]] = p[1]
+        updated = []
+        for i in range (self.numParticles):
+            sample = ((util.sample(toSample),1))
+            #print sample
+            updated.append(sample)
+        
+        self.particles = updated
+        #print self.particles
+
+        
 
     def elapseTime(self, gameState):
         """
@@ -410,6 +442,7 @@ class ParticleFilter(InferenceModule):
         for pos in self.legalPositions:
             distribution[pos] = 0
         for p in self.particles:
+            #print type(distribution), type (p)
             distribution[p[0]]+=1
         for key, value in distribution.items():
             #print distribution[key]
