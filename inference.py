@@ -377,11 +377,13 @@ class ParticleFilter(InferenceModule):
                 p = (jail, p[1])
             return
 
-        for p in self.particles:
+        for i, p in enumerate(self.particles):
             #emmission model is probability of getting noisy distance given x is the true (manhattan) distance
             true = util.manhattanDistance(p[0], pacmanPosition)
             mult = emissionModel[true]
-            p = (p[0],mult*p[1])
+            #print p[0], true-noisyDistance, mult*p[1]
+            self.particles[i] = (p[0], mult*p[1])
+            #print p
 
         allZero = True
         for p in self.particles:
@@ -389,7 +391,7 @@ class ParticleFilter(InferenceModule):
                 allZero = False
                 break
         if allZero:
-            self.initializeUniformly()
+            self.initializeUniformly(gameState)
         
 
 
