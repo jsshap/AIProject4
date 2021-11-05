@@ -532,6 +532,9 @@ class JointParticleFilter:
         weight with each position) is incorrect and may produce errors.
         """
         "*** YOUR CODE HERE ***"
+        ghosts = self.ghostAgents
+        print itertools.product(ghosts, [p for p in self.legalPositions])
+
 
     def addGhostAgent(self, agent):
         """
