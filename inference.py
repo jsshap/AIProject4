@@ -333,7 +333,6 @@ class ParticleFilter(InferenceModule):
             self.particles = []
             for i in range(self.numParticles):
                 sample = ((util.sample(self.beliefs), 1))
-                print sample
                 self.particles.append(sample)
             
 
@@ -369,12 +368,20 @@ class ParticleFilter(InferenceModule):
         emissionModel = busters.getObservationDistribution(noisyDistance)
         pacmanPosition = gameState.getPacmanPosition()
         "*** YOUR CODE HERE ***"
-        update = self.beliefs
+        #print emissionModel
+        
         #reweight
         jail = self.getJailPosition()
         if noisyDistance == None:
             for p in self.particles:
                 p = (jail, p[1])
+            return
+
+        for p in self.particles:
+            #emmission model is probability of getting noisy distance given x is the true (manhattan) distance
+            true = util.manhattanDistance(p[0], pacmanPosition)
+            mult = emissionModel[true]
+            p = (p[0],mult*p[1])
 
         allZero = True
         for p in self.particles:
@@ -385,8 +392,7 @@ class ParticleFilter(InferenceModule):
             self.initializeUniformly()
         
 
-        for p in self.particles:
-            p = (p[0],emissionModel[p[0]]*p[1])
+
 
         #resample
         #make counter with position, weight:
