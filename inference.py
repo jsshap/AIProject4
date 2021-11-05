@@ -390,12 +390,12 @@ class ParticleFilter(InferenceModule):
         a belief distribution.
         """
         "*** YOUR CODE HERE ***"
-        print "heeree"
+        #print "heeree"
         for p in self.particles:
             oldPos = p[0]
             newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, oldPos))
             newPos = util.sample(newPosDist)
-            print oldPos, newPos
+            #print oldPos, newPos
             p = (newPos, p[1])
 
     def getBeliefDistribution(self):
@@ -411,9 +411,14 @@ class ParticleFilter(InferenceModule):
             distribution[pos] = 0
         for p in self.particles:
             distribution[p[0]]+=1
-        for pos in self.legalPositions:
-            distribution[pos]/=len(self.particles)
+        for key, value in distribution.items():
+            #print distribution[key]
+            a = distribution[key]
+            new = float(a)/(self.numParticles)
+            distribution[key]= new
+            #print distribution[key]
         self.beliefs = distribution
+        #self.beliefs.normalize()
         return self.beliefs
 class MarginalInference(InferenceModule):
     """
