@@ -330,6 +330,7 @@ class ParticleFilter(InferenceModule):
                     #each particle is a tuple of (position, weight)
         else:
             #self.beliefs exists
+            print "HERE"
             self.particles = []
             for i in range(self.numParticles):
                 sample = ((util.sample(self.beliefs), 1))
@@ -532,8 +533,22 @@ class JointParticleFilter:
         weight with each position) is incorrect and may produce errors.
         """
         "*** YOUR CODE HERE ***"
-        ghosts = self.ghostAgents
-        print itertools.product(ghosts, [p for p in self.legalPositions])
+        self.beliefs = util.Counter()
+        if not self.beliefs.items():
+            states = random.shuffle(itertools.product(self.legalPositions, repeat= 3))
+            numStates = len(states)
+            particlesPerState = self.numParticles/numStates
+            self.particles = []
+            for s in states:
+                for i in range(particlesPerState):
+                    self.particles.append(s)
+            self.weights=util.Counter()
+            for s in states:
+                self.weights[s] =1
+        else:
+            pass
+
+        #particles will be (tupleA, tupleB) where tuple A is: (ghostLoc, ghostLoc, ghostLoc) and B is: (weight,weight,weight)
 
 
     def addGhostAgent(self, agent):
@@ -582,6 +597,16 @@ class JointParticleFilter:
         emissionModels = [busters.getObservationDistribution(dist) for dist in noisyDistances]
 
         "*** YOUR CODE HERE ***"
+        for i in range(self.numGhosts):
+
+            dist  = noisyDistances[i]
+            jail = self.getJailPosition()
+            if dist is None:
+                for j, p in enumerate(self.particles):
+                    self.particles[j] = self.getParticleWithGhostInJail(p, i)
+            
+            #reweight
+
 
     def getParticleWithGhostInJail(self, particle, ghostIndex):
         """
@@ -649,7 +674,7 @@ class JointParticleFilter:
 
     def getBeliefDistribution(self):
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return util.Counter()
 
 # One JointInference module is shared globally across instances of MarginalInference
 jointInference = JointParticleFilter()
