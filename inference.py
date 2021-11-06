@@ -612,26 +612,40 @@ class JointParticleFilter:
                 true = util.manhattanDistance(p[i], pacmanPosition)
                 mult = emissionModels[i][true]
                 self.weights[p] *= mult
-            #reweight
+        #reweight
             #0 weight case
         if self.weights.totalCount() == 0:
             self.initializeParticles()
             for index, val in self.weights.items():
                 self.weights[index] = 1
+        assert(self.weights.totalCount > 0)
+        for i in range(self.numGhosts):
+            if noisyDistances[i] is None:
+                for j, p in enumerate(self.particles):
+                    self.particles[j] = self.getParticleWithGhostInJail(p, i)
+
 
             #resample
         toSample = util.Counter()
-        print self.weights.totalCount()
+        #print self.weights.totalCount()
+        assert(self.weights.totalCount > 0)
+        self.weights.normalize()
+
         for p in self.particles:
             if not p in toSample:
                 toSample[p] = self.weights[p]
+
             else:
                 toSample[p] += self.weights[p]
-            if not self.weights[p] == 0:
-                print toSample[p], "IJEAHFDS"
 
-            
- 
+        
+        if toSample.totalCount() == 0:
+            for index, val in toSample.items():
+                toSample[index] = 1
+            #print "HERE"
+        
+
+        #print toSample, toSample.totalCount()
         newParticles = []
         for i in range(self.numParticles):
             #assert(self.numParticles == len(self.particles))
