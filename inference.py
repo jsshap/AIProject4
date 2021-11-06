@@ -546,9 +546,12 @@ class JointParticleFilter:
                     self.particles.append(s)
             #print self.numGhosts
             #print self.states
-            self.weights=util.Counter()
-            for s in self.states:
-                self.weights[s] =1
+            # self.weights=util.Counter()
+            # for s in self.states:
+            #     self.weights[s] =1
+            self.weights = []
+            for i in range(len(self.particles)):
+                self.weights.append(1)
         else:
             pass
 
@@ -603,83 +606,49 @@ class JointParticleFilter:
         "*** YOUR CODE HERE ***"
         #reweight
         for i in range(self.numGhosts):
-            dist  = noisyDistances[i]
-            #jail = self.getJailPosition(i)
-            if dist is None:
-                for j, p in enumerate(self.particles):
-                    self.particles[j] = self.getParticleWithGhostInJail(p, i)
-            '''
-            for p in self.particles:
-                true = util.manhattanDistance(p[i], pacmanPosition)
-                mult = emissionModels[i][true]
-                self.weights[p] *= mult
-            '''
-            for s in self.states:
-                true = util.manhattanDistance(s[i], pacmanPosition)
-                mult = emissionModels[i][true]
-                self.weights[s]*=mult
-        
-            #0 weight case
-        
-        if self.weights.totalCount() == 0:
-            self.initializeParticles()
-            for index, val in self.weights.items():
-                self.weights[index] = 1
-        assert(self.weights.totalCount > 0)
-        
-        for i in range(self.numGhosts):
             if noisyDistances[i] is None:
-                for j, p in enumerate(self.particles):
+                for j,p in enumerate(self.particles):
                     self.particles[j] = self.getParticleWithGhostInJail(p, i)
         
+        for i, p in enumerate(self.particles):
+            emmisions = []
+            for j in range(self.numGhosts):
+                emmisions.append(emissionModels[j][util.manhattanDistance(pacmanPosition, p[j])])
+            mult = 1
+            for e in emmisions:
+                mult *= e
+            #print i, len(self.particles)
+            self.weights[i] *= mult
 
+        if sum(self.weights)==0:
+            self.initializeParticles()
+            for i in range(self.numGhosts):
+                if noisyDistances[i] is None:
+                    for j,p in enumerate(self.particles):
+                        self.particles[j] = self.getParticleWithGhostInJail(p, i)
 
-            
+        #resample
 
-                
-
-
-
-
-            #resample
         toSample = util.Counter()
-        #print self.weights.totalCount()
-        assert(self.weights.totalCount > 0)
-        #self.weights.normalize()
-
         for p in self.particles:
-            if not p in toSample:
-                toSample[p] = self.weights[p]
-
-            else:
-                toSample[p] += self.weights[p]
-
-        '''
-        if toSample.totalCount() == 0:
-            for index, val in toSample.items():
-                toSample[index] = 1
-            #print "HERE"
-        '''
-        
-
-        #print toSample, toSample.totalCount()
+            toSample[p] = 0
+        for i, p in enumerate(self.particles):
+            toSample [p] += self.weights[i]
         newParticles = []
-        for i in range(self.numParticles):
-            #assert(self.numParticles == len(self.particles))
-            sample = util.sample(toSample)
-            newParticles.append(sample)
+        for i in range(len(self.particles)):
+            #print toSample.totalCount(), sum(self.weights)
+            newParticles.append(util.sample(toSample))
 
-        #print self.particles == newParticles
+        self.particles=newParticles
+            
+
         
-        self.particles = newParticles
+        
 
-        '''
-            Edit both states and weights, find total weight of each state, resample from the new weight of each state
-        '''
-                
             
-           
-            
+
+        
+
 
 
     def getParticleWithGhostInJail(self, particle, ghostIndex):
