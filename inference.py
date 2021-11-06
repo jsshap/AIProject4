@@ -601,35 +601,51 @@ class JointParticleFilter:
         emissionModels = [busters.getObservationDistribution(dist) for dist in noisyDistances]
 
         "*** YOUR CODE HERE ***"
-
+        #reweight
         for i in range(self.numGhosts):
             dist  = noisyDistances[i]
             #jail = self.getJailPosition(i)
             if dist is None:
                 for j, p in enumerate(self.particles):
                     self.particles[j] = self.getParticleWithGhostInJail(p, i)
+            '''
             for p in self.particles:
                 true = util.manhattanDistance(p[i], pacmanPosition)
                 mult = emissionModels[i][true]
                 self.weights[p] *= mult
-        #reweight
+            '''
+            for s in self.states:
+                true = util.manhattanDistance(s[i], pacmanPosition)
+                mult = emissionModels[i][true]
+                self.weights[s]*=mult
+        
             #0 weight case
+        
         if self.weights.totalCount() == 0:
             self.initializeParticles()
             for index, val in self.weights.items():
                 self.weights[index] = 1
         assert(self.weights.totalCount > 0)
+        
         for i in range(self.numGhosts):
             if noisyDistances[i] is None:
                 for j, p in enumerate(self.particles):
                     self.particles[j] = self.getParticleWithGhostInJail(p, i)
+        
+
+
+            
+
+                
+
+
 
 
             #resample
         toSample = util.Counter()
         #print self.weights.totalCount()
         assert(self.weights.totalCount > 0)
-        self.weights.normalize()
+        #self.weights.normalize()
 
         for p in self.particles:
             if not p in toSample:
@@ -638,11 +654,12 @@ class JointParticleFilter:
             else:
                 toSample[p] += self.weights[p]
 
-        
+        '''
         if toSample.totalCount() == 0:
             for index, val in toSample.items():
                 toSample[index] = 1
             #print "HERE"
+        '''
         
 
         #print toSample, toSample.totalCount()
@@ -651,6 +668,8 @@ class JointParticleFilter:
             #assert(self.numParticles == len(self.particles))
             sample = util.sample(toSample)
             newParticles.append(sample)
+
+        #print self.particles == newParticles
         
         self.particles = newParticles
 
