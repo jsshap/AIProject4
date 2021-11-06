@@ -413,7 +413,7 @@ class ParticleFilter(InferenceModule):
         
         self.particles = updated
         #print self.particles
-
+    
         
 
     def elapseTime(self, gameState):
@@ -539,10 +539,13 @@ class JointParticleFilter:
             random.shuffle(self.states)
             numStates = len(self.states)
             particlesPerState = self.numParticles/numStates
+            #print particlesPerState
             self.particles = []
             for s in self.states:
                 for i in range(particlesPerState):
                     self.particles.append(s)
+            #print self.numGhosts
+            #print self.states
             self.weights=util.Counter()
             for s in self.states:
                 self.weights[s] =1
@@ -598,15 +601,52 @@ class JointParticleFilter:
         emissionModels = [busters.getObservationDistribution(dist) for dist in noisyDistances]
 
         "*** YOUR CODE HERE ***"
+
         for i in range(self.numGhosts):
- 
             dist  = noisyDistances[i]
-            jail = self.getJailPosition(i)
+            #jail = self.getJailPosition(i)
             if dist is None:
                 for j, p in enumerate(self.particles):
                     self.particles[j] = self.getParticleWithGhostInJail(p, i)
-            
+            for p in self.particles:
+                true = util.manhattanDistance(p[i], pacmanPosition)
+                mult = emissionModels[i][true]
+                self.weights[p] *= mult
             #reweight
+            #0 weight case
+        if self.weights.totalCount() == 0:
+            self.initializeParticles()
+            for index, val in self.weights.items():
+                self.weights[index] = 1
+
+            #resample
+        toSample = util.Counter()
+        print self.weights.totalCount()
+        for p in self.particles:
+            if not p in toSample:
+                toSample[p] = self.weights[p]
+            else:
+                toSample[p] += self.weights[p]
+            if not self.weights[p] == 0:
+                print toSample[p], "IJEAHFDS"
+
+            
+ 
+        newParticles = []
+        for i in range(self.numParticles):
+            #assert(self.numParticles == len(self.particles))
+            sample = util.sample(toSample)
+            newParticles.append(sample)
+        
+        self.particles = newParticles
+
+        '''
+            Edit both states and weights, find total weight of each state, resample from the new weight of each state
+        '''
+                
+            
+           
+            
 
 
     def getParticleWithGhostInJail(self, particle, ghostIndex):
@@ -697,6 +737,9 @@ class JointParticleFilter:
             #print distribution[key]
         self.beliefs = distribution
         #self.beliefs.normalize()
+
+
+
         return self.beliefs
 
 # One JointInference module is shared globally across instances of MarginalInference
