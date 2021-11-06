@@ -535,15 +535,16 @@ class JointParticleFilter:
         "*** YOUR CODE HERE ***"
         self.beliefs = util.Counter()
         if not self.beliefs.items():
-            states = random.shuffle(itertools.product(self.legalPositions, repeat= 3))
-            numStates = len(states)
+            self.states = ([s for s in itertools.product(self.legalPositions, repeat= 3)])
+            random.shuffle(self.states)
+            numStates = len(self.states)
             particlesPerState = self.numParticles/numStates
             self.particles = []
-            for s in states:
+            for s in self.states:
                 for i in range(particlesPerState):
                     self.particles.append(s)
             self.weights=util.Counter()
-            for s in states:
+            for s in self.states:
                 self.weights[s] =1
         else:
             pass
@@ -598,9 +599,9 @@ class JointParticleFilter:
 
         "*** YOUR CODE HERE ***"
         for i in range(self.numGhosts):
-
+ 
             dist  = noisyDistances[i]
-            jail = self.getJailPosition()
+            jail = self.getJailPosition(i)
             if dist is None:
                 for j, p in enumerate(self.particles):
                     self.particles[j] = self.getParticleWithGhostInJail(p, i)
@@ -667,6 +668,12 @@ class JointParticleFilter:
             # now loop through and update each entry in newParticle...
 
             "*** YOUR CODE HERE ***"
+            prevGhostPositions  = oldParticle
+
+        
+            for i in range (self.numGhosts):
+                newPosDist = getPositionDistributionForGhost(setGhostPositions(gameState, prevGhostPositions), i, self.ghostAgents[i])
+                newParticle[i] = util.sample(newPosDist)
 
             "*** END YOUR CODE HERE ***"
             newParticles.append(tuple(newParticle))
@@ -674,7 +681,23 @@ class JointParticleFilter:
 
     def getBeliefDistribution(self):
         "*** YOUR CODE HERE ***"
-        return util.Counter()
+        numParticles = len (self.particles)
+        distribution = util.Counter()
+            
+        for state in self.states:
+            distribution[state] = 0
+        for p in self.particles:
+            #print type(distribution), type (p)
+            distribution[p]+=1
+        for key, value in distribution.items():
+            #print distribution[key]
+            a = distribution[key]
+            new = float(a)/(self.numParticles)
+            distribution[key]= new
+            #print distribution[key]
+        self.beliefs = distribution
+        #self.beliefs.normalize()
+        return self.beliefs
 
 # One JointInference module is shared globally across instances of MarginalInference
 jointInference = JointParticleFilter()
