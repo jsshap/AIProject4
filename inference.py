@@ -535,7 +535,7 @@ class JointParticleFilter:
         "*** YOUR CODE HERE ***"
         self.beliefs = util.Counter()
         if not self.beliefs.items():
-            self.states = ([s for s in itertools.product(self.legalPositions, repeat= 3)])
+            self.states = ([s for s in itertools.product(self.legalPositions, repeat= self.numGhosts)])
             random.shuffle(self.states)
             numStates = len(self.states)
             particlesPerState = self.numParticles/numStates
