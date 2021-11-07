@@ -605,15 +605,20 @@ class JointParticleFilter:
 
         "*** YOUR CODE HERE ***"
         #reweight
+        jailed = []
+        for i in range (self.numGhosts):
+            jailed.append(False)
         for i in range(self.numGhosts):
             if noisyDistances[i] is None:
                 for j,p in enumerate(self.particles):
                     self.particles[j] = self.getParticleWithGhostInJail(p, i)
+                    jailed [i] = True
         
         for i, p in enumerate(self.particles):
             emmisions = []
             for j in range(self.numGhosts):
-                emmisions.append(emissionModels[j][util.manhattanDistance(pacmanPosition, p[j])])
+                if not jailed[j]:
+                    emmisions.append(emissionModels[j][util.manhattanDistance(pacmanPosition, p[j])])
             mult = 1
             for e in emmisions:
                 mult *= e
@@ -734,11 +739,11 @@ class JointParticleFilter:
         for key, value in distribution.items():
             #print distribution[key]
             a = distribution[key]
-            new = float(a)/(self.numParticles)
+            new = float(a)/(len(self.particles))
             distribution[key]= new
             #print distribution[key]
         self.beliefs = distribution
-        #self.beliefs.normalize()
+        self.beliefs.normalize()
 
 
 
