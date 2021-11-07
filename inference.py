@@ -613,6 +613,7 @@ class JointParticleFilter:
                 for j,p in enumerate(self.particles):
                     self.particles[j] = self.getParticleWithGhostInJail(p, i)
                     jailed [i] = True
+
         
         for i, p in enumerate(self.particles):
             emmisions = []
@@ -623,14 +624,14 @@ class JointParticleFilter:
             for e in emmisions:
                 mult *= e
             #print i, len(self.particles)
-            self.weights[i] *= mult
+            self.weights[i] = mult
 
         if sum(self.weights)==0:
             self.initializeParticles()
             for i in range(self.numGhosts):
                 if noisyDistances[i] is None:
                     for j,p in enumerate(self.particles):
-                        self.particles[j] = self.getParticleWithGhostInJail(p, i)
+                        self.particles[j] = self.getParticleWithGhostInJail(p, i)       
 
         #resample
 
@@ -739,7 +740,7 @@ class JointParticleFilter:
         for key, value in distribution.items():
             #print distribution[key]
             a = distribution[key]
-            new = float(a)/(len(self.particles))
+            new = float(a)/(len(self.particles)+1)
             distribution[key]= new
             #print distribution[key]
         self.beliefs = distribution
